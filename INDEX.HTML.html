@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Legal Division — Document Management System</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#030712;--surface:#0f172a;--surface2:#1e293b;--border:#334155;
+    --text:#f1f5f9;--muted:#94a3b8;--dim:#64748b;--accent:#3b82f6;--accent-light:#60a5fa;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh}
+  ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--surface)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+  /* HEADER */
+  #header{background:linear-gradient(180deg,#0f172a,#030712);border-bottom:1px solid var(--border);padding:24px 24px 0;position:sticky;top:0;z-index:100}
+  .header-inner{max-width:960px;margin:0 auto}
+  .header-brand{display:flex;align-items:center;gap:14px;margin-bottom:4px}
+  .brand-icon{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#1e40af,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+  .brand-title{font-size:17px;font-weight:700;letter-spacing:.5px;color:var(--text)}
+  .brand-sub{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--dim);margin-top:2px}
+  .tabs{display:flex;margin-top:18px;gap:0}
+  .tab-btn{background:transparent;border:none;border-bottom:2px solid transparent;color:var(--dim);padding:11px 22px;font-size:11px;font-weight:600;cursor:pointer;letter-spacing:1.5px;text-transform:uppercase;font-family:inherit;transition:all .2s}
+  .tab-btn.active{border-bottom-color:var(--accent);color:var(--accent-light)}
+  .tab-btn:hover:not(.active){color:var(--muted);border-bottom-color:var(--border)}
+
+  /* CONTENT */
+  .content{max-width:960px;margin:0 auto;padding:32px 24px;animation:fadeIn .3s ease}
+
+  /* MINDMAP */
+  .mindmap-hint{text-align:center;color:var(--dim);font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:32px}
+  .mm-layout{display:flex;flex-direction:column;align-items:center}
+  .mm-row{display:flex;gap:12px;justify-content:center}
+  .mm-connector-row{display:flex;gap:100px;justify-content:center}
+  .mm-line{width:2px;background:linear-gradient(to bottom,transparent,var(--border));height:36px}
+  .mm-line-down{width:2px;background:linear-gradient(to bottom,var(--border),transparent);height:36px}
+  .mm-center{background:linear-gradient(135deg,var(--surface),var(--surface2));border:2px solid var(--border);border-radius:18px;padding:22px 36px;text-align:center;box-shadow:0 0 40px rgba(148,163,184,.08);position:relative}
+  .mm-center-icon{font-size:28px;margin-bottom:8px}
+  .mm-center-title{color:var(--text);font-size:14px;font-weight:700;letter-spacing:1.5px}
+  .mm-center-sub{color:var(--muted);font-size:11px;margin-top:3px}
+  .branch-card{border-radius:14px;padding:18px 22px;text-align:center;cursor:pointer;transition:all .2s;min-width:148px;border:2px solid;user-select:none}
+  .branch-card:hover{transform:translateY(-2px)}
+  .branch-icon{font-size:20px;margin-bottom:7px}
+  .branch-label{font-size:11px;font-weight:700;letter-spacing:1px;line-height:1.4}
+
+  /* DETAIL PANEL */
+  .detail-panel{border-radius:16px;padding:26px;margin-top:36px;animation:fadeIn .3s ease;border:1px solid}
+  .detail-header{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+  .detail-sub-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+  .detail-sub-card{background:var(--bg);border-radius:12px;padding:16px}
+  .detail-sub-title{font-size:11px;font-weight:700;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+  .detail-item{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);margin-bottom:6px}
+  .dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+
+  /* FLOW */
+  .flow-section{margin-top:48px}
+  .flow-title{text-align:center;color:var(--muted);font-size:11px;letter-spacing:3px;text-transform:uppercase;margin-bottom:22px}
+  .flow-row{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:4px}
+  .flow-step{border-radius:10px;padding:12px 14px;text-align:center;min-width:90px;border:1px solid}
+  .flow-num{font-size:18px;font-weight:700;color:var(--muted)}
+  .flow-lbl{font-size:10px;color:var(--text);margin-top:4px;line-height:1.4}
+  .flow-arrow{color:var(--border);font-size:18px;margin:0 4px}
+
+  /* SOP */
+  .sop-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px}
+  .sop-tab{background:transparent;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;border:1px solid var(--border);color:var(--dim)}
+  .sop-tab.active{color:#fff}
+  .sop-header{border-radius:14px;padding:20px 24px;margin-bottom:22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;border:1px solid}
+  .sop-title{font-size:17px;font-weight:700}
+  .sop-prefix{font-size:11px;color:var(--dim);margin-top:3px}
+  .sop-retention-box{background:var(--bg);border-radius:8px;padding:8px 16px;text-align:right}
+  .sop-retention-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:1px}
+  .sop-retention-val{font-size:12px;font-weight:600;margin-top:3px}
+  .sop-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+  @media(max-width:600px){.sop-grid{grid-template-columns:1fr}.mm-row{flex-direction:column;align-items:center}}
+  .sop-card{background:var(--bg);border-radius:12px;padding:18px;border:1px solid}
+  .sop-card-title{font-size:12px;font-weight:700;margin-bottom:14px;letter-spacing:.5px}
+  .sop-item{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start}
+  .sop-num{font-size:11px;font-weight:700;min-width:16px;margin-top:1px}
+  .sop-text{font-size:12px;color:var(--muted);line-height:1.55}
+  .kode-grid{display:flex;flex-wrap:wrap;gap:10px}
+  .kode-badge{border-radius:8px;padding:8px 14px;display:flex;gap:10px;align-items:center;border:1px solid}
+  .kode-code{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700}
+  .kode-label{font-size:11px;color:var(--dim)}
+  .alur-list{display:flex;flex-direction:column}
+  .alur-item{display:flex;gap:14px;align-items:flex-start}
+  .alur-bullet-col{display:flex;flex-direction:column;align-items:center}
+  .alur-circle{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;border:2px solid}
+  .alur-vline{width:2px;height:22px;margin:3px 0}
+  .alur-text{font-size:12px;color:var(--muted);padding-top:4px;line-height:1.5}
+  .section-box{background:var(--bg);border-radius:12px;padding:18px;border:1px solid var(--border);margin-bottom:16px}
+  .section-label{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:14px;letter-spacing:1px}
+
+  /* LEGAL OPINION */
+  .lo-header{background:linear-gradient(135deg,var(--surface2),var(--surface));border:1px solid var(--border);border-radius:16px;padding:26px;margin-bottom:26px;text-align:center}
+  .lo-badge-row{margin-top:16px;display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+  .lo-badge{background:#1e3a5f;color:#60a5fa;font-size:10px;padding:4px 14px;border-radius:20px;letter-spacing:1px}
+  .accordion{margin-bottom:10px}
+  .acc-btn{width:100%;text-align:left;border-radius:12px;padding:14px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;justify-content:space-between;align-items:center;letter-spacing:.5px}
+  .acc-btn.open{border-radius:12px 12px 0 0}
+  .acc-body{background:#0a0f1e;border:1px solid #1e3a5f;border-top:none;border-radius:0 0 12px 12px;padding:20px}
+  .acc-body p{color:var(--muted);font-size:13px;line-height:1.8;white-space:pre-line}
+  .lo-item{background:var(--surface);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:14px 16px;margin-bottom:12px}
+  .lo-item-title{color:var(--accent-light);font-size:12px;font-weight:700;margin-bottom:8px}
+  .lo-item-detail{color:var(--muted);font-size:12px;line-height:1.7}
+
+  /* FOOTER */
+  footer{text-align:center;padding:28px;color:var(--border);font-size:10px;letter-spacing:2.5px;text-transform:uppercase;border-top:1px solid var(--border);margin-top:40px}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div class="header-inner">
+    <div class="header-brand">
+      <div class="brand-icon">⚖️</div>
+      <div>
+        <div class="brand-title">LEGAL DOCUMENT MANAGEMENT SYSTEM</div>
+        <div class="brand-sub">Legal Division &nbsp;·&nbsp; ISO 9001 Compliant &nbsp;·&nbsp; Panduan Pengarsipan</div>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab(0)">🗺 Mindmap Alur</button>
+      <button class="tab-btn" onclick="switchTab(1)">📂 SOP Pengarsipan</button>
+      <button class="tab-btn" onclick="switchTab(2)">📜 Legal Opinion</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ TAB 0: MINDMAP ═══════════════════ -->
+<div id="tab-0" class="content">
+  <p class="mindmap-hint">Klik cabang untuk melihat detail sub-kategori dokumen</p>
+
+  <div class="mm-layout">
+    <!-- Top branches -->
+    <div class="mm-row" id="top-branches">
+      <div class="branch-card" id="bc-kontrak"
+        style="background:#1a6b5a33;border-color:#1a6b5a55"
+        onclick="toggleBranch('kontrak')">
+        <div class="branch-icon">📋</div>
+        <div class="branch-label" style="color:#94a3b8">KONTRAK<br>KOMERSIAL</div>
+      </div>
+      <div class="branch-card" id="bc-perizinan"
+        style="background:#1a3d6b33;border-color:#1a3d6b55"
+        onclick="toggleBranch('perizinan')">
+        <div class="branch-icon">🏛️</div>
+        <div class="branch-label" style="color:#94a3b8">PERIZINAN &<br>REGULASI</div>
+      </div>
+    </div>
+
+    <!-- Connectors top -->
+    <div class="mm-connector-row">
+      <div class="mm-line"></div>
+      <div class="mm-line"></div>
+    </div>
+
+    <!-- Center node -->
+    <div class="mm-center">
+      <div class="mm-center-icon">⚖️</div>
+      <div class="mm-center-title">SISTEM ARSIP</div>
+      <div class="mm-center-sub">DIVISI LEGAL</div>
+    </div>
+
+    <!-- Connectors bottom -->
+    <div class="mm-connector-row">
+      <div class="mm-line-down"></div>
+      <div class="mm-line-down"></div>
+    </div>
+
+    <!-- Bottom branches -->
+    <div class="mm-row">
+      <div class="branch-card" id="bc-proyek"
+        style="background:#6b1a1a33;border-color:#6b1a1a55"
+        onclick="toggleBranch('proyek')">
+        <div class="branch-icon">🏗️</div>
+        <div class="branch-label" style="color:#94a3b8">PROYEK &<br>PROPERTI</div>
+      </div>
+      <div class="branch-card" id="bc-korporat"
+        style="background:#5a1a6b33;border-color:#5a1a6b55"
+        onclick="toggleBranch('korporat')">
+        <div class="branch-icon">⚖️</div>
+        <div class="branch-label" style="color:#94a3b8">KORPORAT &<br>GOVERNANCE</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail panels (hidden by default) -->
+  <div id="detail-kontrak" class="detail-panel hidden" style="background:#1a6b5a22;border-color:#2ecc9a44">
+    <div class="detail-header">
+      <span style="font-size:24px">📋</span>
+      <div>
+        <div style="color:#2ecc9a;font-weight:700;font-size:14px;letter-spacing:2px">KONTRAK KOMERSIAL</div>
+        <div style="color:var(--dim);font-size:11px">Sub-kategori dokumen</div>
+      </div>
+    </div>
+    <div class="detail-sub-grid">
+      <div class="detail-sub-card" style="border:1px solid #2ecc9a33">
+        <div class="detail-sub-title" style="color:#2ecc9a">Kontrak Aktif</div>
+        <div class="detail-item"><div class="dot" style="background:#2ecc9a"></div>NDA/Kerahasiaan</div>
+        <div class="detail-item"><div class="dot" style="background:#2ecc9a"></div>MOU/PKS</div>
+        <div class="detail-item"><div class="dot" style="background:#2ecc9a"></div>Kontrak Jual-Beli</div>
+        <div class="detail-item"><div class="dot" style="background:#2ecc9a"></div>Kontrak Jasa</div>
+        <div class="detail-item"><div class="dot" style="background:#2ecc9a"></div>Kontrak Sewa</div>
+      </div>
+      <div class="detail-sub-card" style="border:1px solid #2ecc9a33">
+        <div class="detail-sub-title" style="color:#2ecc9a">Kontrak Berakhir</div>
+        <div class="detail-item"><div class="dot" style="background:#2ecc9a"></div>Expired ≤5 thn</div>
+        <div class="detail-item"><div class="dot" style="background:#2ecc9a"></div>Expired >5 thn</div>
+        <div class="detail-item"><div class="dot" style="background:#2ecc9a"></div>Terminated</div>
+        <div class="detail-item"><div class="dot" style="background:#2ecc9a"></div>Diputus Sepihak</div>
+      </div>
+      <div class="detail-sub-card" style="border:1px solid #2ecc9a33">
+        <div class="detail-sub-title" style="color:#2ecc9a">Draft & Negosiasi</div>
+        <div class="detail-item"><div class="dot" style="background:#2ecc9a"></div>Draft Internal</div>
+        <div class="detail-item"><div class="dot" style="background:#2ecc9a"></div>Draft Counter-Party</div>
+        <div class="detail-item"><div class="dot" style="background:#2ecc9a"></div>Track Changes</div>
+        <div class="detail-item"><div class="dot" style="background:#2ecc9a"></div>Final Review</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="detail-perizinan" class="detail-panel hidden" style="background:#1a3d6b22;border-color:#3a9bd544">
+    <div class="detail-header">
+      <span style="font-size:24px">🏛️</span>
+      <div>
+        <div style="color:#3a9bd5;font-weight:700;font-size:14px;letter-spacing:2px">PERIZINAN & REGULASI</div>
+        <div style="color:var(--dim);font-size:11px">Sub-kategori dokumen</div>
+      </div>
+    </div>
+    <div class="detail-sub-grid">
+      <div class="detail-sub-card" style="border:1px solid #3a9bd533">
+        <div class="detail-sub-title" style="color:#3a9bd5">Izin Perusahaan</div>
+        <div class="detail-item"><div class="dot" style="background:#3a9bd5"></div>NIB/SIUP</div>
+        <div class="detail-item"><div class="dot" style="background:#3a9bd5"></div>Akta & SK Kemenkumham</div>
+        <div class="detail-item"><div class="dot" style="background:#3a9bd5"></div>NPWP Perusahaan</div>
+        <div class="detail-item"><div class="dot" style="background:#3a9bd5"></div>Domisili</div>
+      </div>
+      <div class="detail-sub-card" style="border:1px solid #3a9bd533">
+        <div class="detail-sub-title" style="color:#3a9bd5">Izin Operasional</div>
+        <div class="detail-item"><div class="dot" style="background:#3a9bd5"></div>Izin Sektoral</div>
+        <div class="detail-item"><div class="dot" style="background:#3a9bd5"></div>Izin Lingkungan/AMDAL</div>
+        <div class="detail-item"><div class="dot" style="background:#3a9bd5"></div>Izin Tenaga Kerja</div>
+        <div class="detail-item"><div class="dot" style="background:#3a9bd5"></div>Izin K3</div>
+      </div>
+      <div class="detail-sub-card" style="border:1px solid #3a9bd533">
+        <div class="detail-sub-title" style="color:#3a9bd5">Izin Proyek</div>
+        <div class="detail-item"><div class="dot" style="background:#3a9bd5"></div>IMB/PBG</div>
+        <div class="detail-item"><div class="dot" style="background:#3a9bd5"></div>Izin Lokasi</div>
+        <div class="detail-item"><div class="dot" style="background:#3a9bd5"></div>Izin Khusus Sektoral</div>
+        <div class="detail-item"><div class="dot" style="background:#3a9bd5"></div>Sertifikat SNI</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="detail-proyek" class="detail-panel hidden" style="background:#6b1a1a22;border-color:#e0525244">
+    <div class="detail-header">
+      <span style="font-size:24px">🏗️</span>
+      <div>
+        <div style="color:#e05252;font-weight:700;font-size:14px;letter-spacing:2px">PROYEK & PROPERTI</div>
+        <div style="color:var(--dim);font-size:11px">Sub-kategori dokumen</div>
+      </div>
+    </div>
+    <div class="detail-sub-grid">
+      <div class="detail-sub-card" style="border:1px solid #e0525233">
+        <div class="detail-sub-title" style="color:#e05252">Dokumen Proyek</div>
+        <div class="detail-item"><div class="dot" style="background:#e05252"></div>Kontrak EPC/Konstruksi</div>
+        <div class="detail-item"><div class="dot" style="background:#e05252"></div>Addendum</div>
+        <div class="detail-item"><div class="dot" style="background:#e05252"></div>Berita Acara</div>
+        <div class="detail-item"><div class="dot" style="background:#e05252"></div>Serah Terima</div>
+      </div>
+      <div class="detail-sub-card" style="border:1px solid #e0525233">
+        <div class="detail-sub-title" style="color:#e05252">Properti & Aset</div>
+        <div class="detail-item"><div class="dot" style="background:#e05252"></div>SHM/SHGB</div>
+        <div class="detail-item"><div class="dot" style="background:#e05252"></div>Sertifikat Tanah</div>
+        <div class="detail-item"><div class="dot" style="background:#e05252"></div>AJB/PPJB</div>
+        <div class="detail-item"><div class="dot" style="background:#e05252"></div>IMB/SLF</div>
+      </div>
+      <div class="detail-sub-card" style="border:1px solid #e0525233">
+        <div class="detail-sub-title" style="color:#e05252">Sengketa</div>
+        <div class="detail-item"><div class="dot" style="background:#e05252"></div>Somasi</div>
+        <div class="detail-item"><div class="dot" style="background:#e05252"></div>Gugatan/Claim</div>
+        <div class="detail-item"><div class="dot" style="background:#e05252"></div>Putusan Pengadilan</div>
+        <div class="detail-item"><div class="dot" style="background:#e05252"></div>Perdamaian/PKPU</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="detail-korporat" class="detail-panel hidden" style="background:#5a1a6b22;border-color:#9b3ad544">
+    <div class="detail-header">
+      <span style="font-size:24px">⚖️</span>
+      <div>
+        <div style="color:#9b3ad5;font-weight:700;font-size:14px;letter-spacing:2px">KORPORAT & GOVERNANCE</div>
+        <div style="color:var(--dim);font-size:11px">Sub-kategori dokumen</div>
+      </div>
+    </div>
+    <div class="detail-sub-grid">
+      <div class="detail-sub-card" style="border:1px solid #9b3ad533">
+        <div class="detail-sub-title" style="color:#9b3ad5">Akta Korporasi</div>
+        <div class="detail-item"><div class="dot" style="background:#9b3ad5"></div>Akta Pendirian</div>
+        <div class="detail-item"><div class="dot" style="background:#9b3ad5"></div>Akta Perubahan</div>
+        <div class="detail-item"><div class="dot" style="background:#9b3ad5"></div>RUPS</div>
+        <div class="detail-item"><div class="dot" style="background:#9b3ad5"></div>Kuasa Direksi</div>
+      </div>
+      <div class="detail-sub-card" style="border:1px solid #9b3ad533">
+        <div class="detail-sub-title" style="color:#9b3ad5">Legal Opinion</div>
+        <div class="detail-item"><div class="dot" style="background:#9b3ad5"></div>LO Internal</div>
+        <div class="detail-item"><div class="dot" style="background:#9b3ad5"></div>LO Eksternal</div>
+        <div class="detail-item"><div class="dot" style="background:#9b3ad5"></div>Due Diligence</div>
+        <div class="detail-item"><div class="dot" style="background:#9b3ad5"></div>Compliance Report</div>
+      </div>
+      <div class="detail-sub-card" style="border:1px solid #9b3ad533">
+        <div class="detail-sub-title" style="color:#9b3ad5">Asuransi</div>
+        <div class="detail-item"><div class="dot" style="background:#9b3ad5"></div>Polis Asuransi</div>
+        <div class="detail-item"><div class="dot" style="background:#9b3ad5"></div>Endorsement</div>
+        <div class="detail-item"><div class="dot" style="background:#9b3ad5"></div>Klaim Asuransi</div>
+        <div class="detail-item"><div class="dot" style="background:#9b3ad5"></div>Renewal</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Flow chart -->
+  <div class="flow-section">
+    <div class="flow-title">Alur Pengarsipan Umum — 6 Langkah</div>
+    <div class="flow-row">
+      <div class="flow-step" style="background:#1e40af22;border-color:#1e40af55"><div class="flow-num">01</div><div class="flow-lbl">DOKUMEN<br>MASUK</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="background:#1a6b5a22;border-color:#1a6b5a55"><div class="flow-num">02</div><div class="flow-lbl">KLASIFIKASI<br>& KODING</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="background:#6b1a1a22;border-color:#6b1a1a55"><div class="flow-num">03</div><div class="flow-lbl">SCAN &<br>DIGITALISASI</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="background:#5a1a6b22;border-color:#5a1a6b55"><div class="flow-num">04</div><div class="flow-lbl">SIMPAN<br>FISIK</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="background:#1a5a6b22;border-color:#1a5a6b55"><div class="flow-num">05</div><div class="flow-lbl">UPLOAD<br>SISTEM</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="background:#6b4e1a22;border-color:#6b4e1a55"><div class="flow-num">06</div><div class="flow-lbl">REVIEW<br>RETENSI</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ TAB 1: SOP ═══════════════════ -->
+<div id="tab-1" class="content hidden">
+  <div class="sop-tabs">
+    <button class="sop-tab active" style="border-color:#2ecc9a55;color:#2ecc9a;background:#1a6b5a22" onclick="switchSOP(0,this)">📋 Kontrak Komersial</button>
+    <button class="sop-tab" onclick="switchSOP(1,this)">🏛️ Perizinan & Regulasi</button>
+    <button class="sop-tab" onclick="switchSOP(2,this)">🏗️ Dokumen Proyek</button>
+    <button class="sop-tab" onclick="switchSOP(3,this)">⚖️ Korporat & Governance</button>
+  </div>
+
+  <div id="sop-panel-0">
+    <div class="sop-header" style="background:#1a6b5a22;border-color:#2ecc9a44">
+      <div><div class="sop-title" style="color:#2ecc9a">📋 KONTRAK KOMERSIAL</div><div class="sop-prefix">Kode Prefix: <strong style="color:var(--muted)">KOM</strong></div></div>
+      <div class="sop-retention-box"><div class="sop-retention-label">Retensi</div><div class="sop-retention-val" style="color:#2ecc9a">10 tahun setelah berakhir</div></div>
+    </div>
+    <div class="sop-grid">
+      <div class="sop-card" style="border-color:#ca8a0444">
+        <div class="sop-card-title" style="color:#ca8a04">📁 HARDCOPY</div>
+        <div class="sop-item"><div class="sop-num" style="color:#ca8a04">1.</div><div class="sop-text">Folder berlabel kode dokumen warna HIJAU</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#ca8a04">2.</div><div class="sop-text">Map plastik transparan per kontrak</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#ca8a04">3.</div><div class="sop-text">Urut: Original → Addendum → BA → Surat Menyurat</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#ca8a04">4.</div><div class="sop-text">Lemari arsip terkunci + log akses</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#ca8a04">5.</div><div class="sop-text">Scan barcode pada cover folder</div></div>
+      </div>
+      <div class="sop-card" style="border-color:#3b82f644">
+        <div class="sop-card-title" style="color:#3b82f6">💾 SOFTCOPY</div>
+        <div class="sop-item"><div class="sop-num" style="color:#3b82f6">1.</div><div class="sop-text">Folder: /LEGAL/KOM/[TAHUN]/[KODE]/</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#3b82f6">2.</div><div class="sop-text">Penamaan: KOM-[YYYY]-[NNN]-[NAMA SINGKAT]</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#3b82f6">3.</div><div class="sop-text">Format final: PDF/A (archival)</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#3b82f6">4.</div><div class="sop-text">Draft & WIP: Word/DOCX dengan track changes</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#3b82f6">5.</div><div class="sop-text">Backup otomatis D+1 ke cloud & server lokal</div></div>
+      </div>
+    </div>
+    <div class="section-box" style="margin-bottom:16px">
+      <div class="section-label">🗂️ STRUKTUR KODE DOKUMEN</div>
+      <div class="kode-grid">
+        <div class="kode-badge" style="background:#1a6b5a33;border-color:#2ecc9a44"><span class="kode-code" style="color:#2ecc9a">KOM-AKT</span><span class="kode-label">Kontrak Aktif</span></div>
+        <div class="kode-badge" style="background:#1a6b5a33;border-color:#2ecc9a44"><span class="kode-code" style="color:#2ecc9a">KOM-EXP</span><span class="kode-label">Kontrak Berakhir</span></div>
+        <div class="kode-badge" style="background:#1a6b5a33;border-color:#2ecc9a44"><span class="kode-code" style="color:#2ecc9a">KOM-DFT</span><span class="kode-label">Draft & Negosiasi</span></div>
+        <div class="kode-badge" style="background:#1a6b5a33;border-color:#2ecc9a44"><span class="kode-code" style="color:#2ecc9a">KOM-SNG</span><span class="kode-label">Sengketa Kontrak</span></div>
+      </div>
+    </div>
+    <div class="section-box">
+      <div class="section-label">🔄 ALUR PENANGANAN DOKUMEN</div>
+      <div class="alur-list">
+        <div class="alur-item"><div class="alur-bullet-col"><div class="alur-circle" style="background:#1a6b5a44;border-color:#2ecc9a;color:#2ecc9a">1</div><div class="alur-vline" style="background:#2ecc9a33"></div></div><div class="alur-text">Draft diterima → Beri kode sementara (DFT)</div></div>
+        <div class="alur-item"><div class="alur-bullet-col"><div class="alur-circle" style="background:#1a6b5a44;border-color:#2ecc9a;color:#2ecc9a">2</div><div class="alur-vline" style="background:#2ecc9a33"></div></div><div class="alur-text">Selesai negosiasi → Update status ke AKT</div></div>
+        <div class="alur-item"><div class="alur-bullet-col"><div class="alur-circle" style="background:#1a6b5a44;border-color:#2ecc9a;color:#2ecc9a">3</div><div class="alur-vline" style="background:#2ecc9a33"></div></div><div class="alur-text">Kontrak ditandatangani → Scan & upload 1x24 jam</div></div>
+        <div class="alur-item"><div class="alur-bullet-col"><div class="alur-circle" style="background:#1a6b5a44;border-color:#2ecc9a;color:#2ecc9a">4</div><div class="alur-vline" style="background:#2ecc9a33"></div></div><div class="alur-text">Distribusi ke pihak terkait (Finance, Ops, dll)</div></div>
+        <div class="alur-item"><div class="alur-bullet-col"><div class="alur-circle" style="background:#1a6b5a44;border-color:#2ecc9a;color:#2ecc9a">5</div><div class="alur-vline" style="background:#2ecc9a33"></div></div><div class="alur-text">Review tahunan: perpanjang / arsip ke EXP</div></div>
+        <div class="alur-item"><div class="alur-bullet-col"><div class="alur-circle" style="background:#1a6b5a44;border-color:#2ecc9a;color:#2ecc9a">6</div></div><div class="alur-text">Retention check: musnahkan sesuai jadwal</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="sop-panel-1" class="hidden">
+    <div class="sop-header" style="background:#1a3d6b22;border-color:#3a9bd544">
+      <div><div class="sop-title" style="color:#3a9bd5">🏛️ PERIZINAN & REGULASI</div><div class="sop-prefix">Kode Prefix: <strong style="color:var(--muted)">IZN</strong></div></div>
+      <div class="sop-retention-box"><div class="sop-retention-label">Retensi</div><div class="sop-retention-val" style="color:#3a9bd5">Selama berlaku + 5 tahun</div></div>
+    </div>
+    <div class="sop-grid">
+      <div class="sop-card" style="border-color:#ca8a0444">
+        <div class="sop-card-title" style="color:#ca8a04">📁 HARDCOPY</div>
+        <div class="sop-item"><div class="sop-num" style="color:#ca8a04">1.</div><div class="sop-text">Folder berlabel kode dokumen warna BIRU</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#ca8a04">2.</div><div class="sop-text">Map merah untuk izin yang akan expire ≤90 hari</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#ca8a04">3.</div><div class="sop-text">Urut: Izin Asli → SK → Lampiran → Korespondensi</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#ca8a04">4.</div><div class="sop-text">Brankas khusus untuk dokumen asli (original)</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#ca8a04">5.</div><div class="sop-text">Daftar masa berlaku terpasang di luar lemari</div></div>
+      </div>
+      <div class="sop-card" style="border-color:#3b82f644">
+        <div class="sop-card-title" style="color:#3b82f6">💾 SOFTCOPY</div>
+        <div class="sop-item"><div class="sop-num" style="color:#3b82f6">1.</div><div class="sop-text">Folder: /LEGAL/IZN/[JENIS]/[TAHUN BERLAKU]/</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#3b82f6">2.</div><div class="sop-text">Penamaan: IZN-[JENIS]-[NOMOR]-[EXPIRE-YYYY]</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#3b82f6">3.</div><div class="sop-text">Reminder otomatis H-90, H-60, H-30 sebelum expire</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#3b82f6">4.</div><div class="sop-text">Link ke sistem OSS / regulator terkait</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#3b82f6">5.</div><div class="sop-text">Backup ke cloud dengan enkripsi AES-256</div></div>
+      </div>
+    </div>
+    <div class="section-box" style="margin-bottom:16px">
+      <div class="section-label">🗂️ STRUKTUR KODE DOKUMEN</div>
+      <div class="kode-grid">
+        <div class="kode-badge" style="background:#1a3d6b33;border-color:#3a9bd544"><span class="kode-code" style="color:#3a9bd5">IZN-KOR</span><span class="kode-label">Izin Korporat</span></div>
+        <div class="kode-badge" style="background:#1a3d6b33;border-color:#3a9bd544"><span class="kode-code" style="color:#3a9bd5">IZN-OPS</span><span class="kode-label">Izin Operasional</span></div>
+        <div class="kode-badge" style="background:#1a3d6b33;border-color:#3a9bd544"><span class="kode-code" style="color:#3a9bd5">IZN-PRY</span><span class="kode-label">Izin Proyek</span></div>
+        <div class="kode-badge" style="background:#1a3d6b33;border-color:#3a9bd544"><span class="kode-code" style="color:#3a9bd5">IZN-EXP</span><span class="kode-label">Izin Berakhir/Dicabut</span></div>
+      </div>
+    </div>
+    <div class="section-box">
+      <div class="section-label">🔄 ALUR PENANGANAN DOKUMEN</div>
+      <div class="alur-list">
+        <div class="alur-item"><div class="alur-bullet-col"><div class="alur-circle" style="background:#1a3d6b44;border-color:#3a9bd5;color:#3a9bd5">1</div><div class="alur-vline" style="background:#3a9bd533"></div></div><div class="alur-text">Izin diterima → Catat di register izin</div></div>
+        <div class="alur-item"><div class="alur-bullet-col"><div class="alur-circle" style="background:#1a3d6b44;border-color:#3a9bd5;color:#3a9bd5">2</div><div class="alur-vline" style="background:#3a9bd533"></div></div><div class="alur-text">Upload softcopy + scan asli ke sistem</div></div>
+        <div class="alur-item"><div class="alur-bullet-col"><div class="alur-circle" style="background:#1a3d6b44;border-color:#3a9bd5;color:#3a9bd5">3</div><div class="alur-vline" style="background:#3a9bd533"></div></div><div class="alur-text">Set reminder sistem H-90 sebelum expire</div></div>
+        <div class="alur-item"><div class="alur-bullet-col"><div class="alur-circle" style="background:#1a3d6b44;border-color:#3a9bd5;color:#3a9bd5">4</div><div class="alur-vline" style="background:#3a9bd533"></div></div><div class="alur-text">Review berkala setiap kuartal</div></div>
+        <div class="alur-item"><div class="alur-bullet-col"><div class="alur-circle" style="background:#1a3d6b44;border-color:#3a9bd5;color:#3a9bd5">5</div><div class="alur-vline" style="background:#3a9bd533"></div></div><div class="alur-text">Proses perpanjangan → Dokumen baru masuk siklus</div></div>
+        <div class="alur-item"><div class="alur-bullet-col"><div class="alur-circle" style="background:#1a3d6b44;border-color:#3a9bd5;color:#3a9bd5">6</div></div><div class="alur-text">Izin dicabut/berakhir → Pindah ke folder EXP</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="sop-panel-2" class="hidden">
+    <div class="sop-header" style="background:#6b1a1a22;border-color:#e0525244">
+      <div><div class="sop-title" style="color:#e05252">🏗️ DOKUMEN PROYEK</div><div class="sop-prefix">Kode Prefix: <strong style="color:var(--muted)">PRY</strong></div></div>
+      <div class="sop-retention-box"><div class="sop-retention-label">Retensi</div><div class="sop-retention-val" style="color:#e05252">15 tahun setelah selesai</div></div>
+    </div>
+    <div class="sop-grid">
+      <div class="sop-card" style="border-color:#ca8a0444">
+        <div class="sop-card-title" style="color:#ca8a04">📁 HARDCOPY</div>
+        <div class="sop-item"><div class="sop-num" style="color:#ca8a04">1.</div><div class="sop-text">Box arsip berlabel kode proyek warna MERAH</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#ca8a04">2.</div><div class="sop-text">Dipisah per proyek dalam lemari dedicated</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#ca8a04">3.</div><div class="sop-text">Urut: Kontrak Induk → Addendum → BA → Sertifikat</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#ca8a04">4.</div><div class="sop-text">Gambar teknik: tabung gambar + label digital</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#ca8a04">5.</div><div class="sop-text">Index per box + daftar isi wajib ada</div></div>
+      </div>
+      <div class="sop-card" style="border-color:#3b82f644">
+        <div class="sop-card-title" style="color:#3b82f6">💾 SOFTCOPY</div>
+        <div class="sop-item"><div class="sop-num" style="color:#3b82f6">1.</div><div class="sop-text">Folder: /LEGAL/PRY/[KODE-PRY]/[FASE]/</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#3b82f6">2.</div><div class="sop-text">Penamaan: PRY-[KODE]-[FASE]-[DOKUMEN]-[VER]</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#3b82f6">3.</div><div class="sop-text">Versi kontrol wajib: v1.0, v1.1, v2.0, dst</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#3b82f6">4.</div><div class="sop-text">Final dokumen lock PDF (tidak bisa diedit)</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#3b82f6">5.</div><div class="sop-text">Backup ke 3 lokasi: server, cloud, external drive</div></div>
+      </div>
+    </div>
+    <div class="section-box" style="margin-bottom:16px">
+      <div class="section-label">🗂️ STRUKTUR KODE DOKUMEN</div>
+      <div class="kode-grid">
+        <div class="kode-badge" style="background:#6b1a1a33;border-color:#e0525244"><span class="kode-code" style="color:#e05252">PRY-CNT</span><span class="kode-label">Kontrak Proyek</span></div>
+        <div class="kode-badge" style="background:#6b1a1a33;border-color:#e0525244"><span class="kode-code" style="color:#e05252">PRY-ADM</span><span class="kode-label">Administrasi & BA</span></div>
+        <div class="kode-badge" style="background:#6b1a1a33;border-color:#e0525244"><span class="kode-code" style="color:#e05252">PRY-AST</span><span class="kode-label">Aset & Properti</span></div>
+        <div class="kode-badge" style="background:#6b1a1a33;border-color:#e0525244"><span class="kode-code" style="color:#e05252">PRY-SNG</span><span class="kode-label">Sengketa Proyek</span></div>
+      </div>
+    </div>
+    <div class="section-box">
+      <div class="section-label">🔄 ALUR PENANGANAN DOKUMEN</div>
+      <div class="alur-list">
+        <div class="alur-item"><div class="alur-bullet-col"><div class="alur-circle" style="background:#6b1a1a44;border-color:#e05252;color:#e05252">1</div><div class="alur-vline" style="background:#e0525233"></div></div><div class="alur-text">Proyek dimulai → Buat folder struktur lengkap</div></div>
+        <div class="alur-item"><div class="alur-bullet-col"><div class="alur-circle" style="background:#6b1a1a44;border-color:#e05252;color:#e05252">2</div><div class="alur-vline" style="background:#e0525233"></div></div><div class="alur-text">Setiap dokumen masuk → Diberi kode + versi</div></div>
+        <div class="alur-item"><div class="alur-bullet-col"><div class="alur-circle" style="background:#6b1a1a44;border-color:#e05252;color:#e05252">3</div><div class="alur-vline" style="background:#e0525233"></div></div><div class="alur-text">Serah terima dokumen dari pihak ketiga → Log penerimaan</div></div>
+        <div class="alur-item"><div class="alur-bullet-col"><div class="alur-circle" style="background:#6b1a1a44;border-color:#e05252;color:#e05252">4</div><div class="alur-vline" style="background:#e0525233"></div></div><div class="alur-text">Milestone selesai → Review & lock dokumen fase</div></div>
+        <div class="alur-item"><div class="alur-bullet-col"><div class="alur-circle" style="background:#6b1a1a44;border-color:#e05252;color:#e05252">5</div><div class="alur-vline" style="background:#e0525233"></div></div><div class="alur-text">Proyek selesai → Closing document checklist</div></div>
+        <div class="alur-item"><div class="alur-bullet-col"><div class="alur-circle" style="background:#6b1a1a44;border-color:#e05252;color:#e05252">6</div></div><div class="alur-text">Transfer ke arsip jangka panjang (cold storage)</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="sop-panel-3" class="hidden">
+    <div class="sop-header" style="background:#5a1a6b22;border-color:#9b3ad544">
+      <div><div class="sop-title" style="color:#9b3ad5">⚖️ KORPORAT & GOVERNANCE</div><div class="sop-prefix">Kode Prefix: <strong style="color:var(--muted)">KRP</strong></div></div>
+      <div class="sop-retention-box"><div class="sop-retention-label">Retensi</div><div class="sop-retention-val" style="color:#9b3ad5">Permanen (tidak dimusnahkan)</div></div>
+    </div>
+    <div class="sop-grid">
+      <div class="sop-card" style="border-color:#ca8a0444">
+        <div class="sop-card-title" style="color:#ca8a04">📁 HARDCOPY</div>
+        <div class="sop-item"><div class="sop-num" style="color:#ca8a04">1.</div><div class="sop-text">Brankas khusus dokumen PERMANEN</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#ca8a04">2.</div><div class="sop-text">Folder berkunci untuk akta dan sertifikat asli</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#ca8a04">3.</div><div class="sop-text">Map warna UNGU untuk identifikasi cepat</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#ca8a04">4.</div><div class="sop-text">Hanya 2 orang authorized (Legal Head + 1)</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#ca8a04">5.</div><div class="sop-text">Log akses wajib ditandatangani setiap pengambilan</div></div>
+      </div>
+      <div class="sop-card" style="border-color:#3b82f644">
+        <div class="sop-card-title" style="color:#3b82f6">💾 SOFTCOPY</div>
+        <div class="sop-item"><div class="sop-num" style="color:#3b82f6">1.</div><div class="sop-text">Folder: /LEGAL/KRP/[JENIS]/[TAHUN]/</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#3b82f6">2.</div><div class="sop-text">Enkripsi end-to-end untuk semua dokumen</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#3b82f6">3.</div><div class="sop-text">Akses terbatas: role-based access control (RBAC)</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#3b82f6">4.</div><div class="sop-text">Audit trail: setiap akses tercatat otomatis</div></div>
+        <div class="sop-item"><div class="sop-num" style="color:#3b82f6">5.</div><div class="sop-text">Triple backup: on-premise, cloud primer, cloud sekunder</div></div>
+      </div>
+    </div>
+    <div class="section-box" style="margin-bottom:16px">
+      <div class="section-label">🗂️ STRUKTUR KODE DOKUMEN</div>
+      <div class="kode-grid">
+        <div class="kode-badge" style="background:#5a1a6b33;border-color:#9b3ad544"><span class="kode-code" style="color:#9b3ad5">KRP-AKT</span><span class="kode-label">Akta & Korporasi</span></div>
+        <div class="kode-badge" style="background:#5a1a6b33;border-color:#9b3ad544"><span class="kode-code" style="color:#9b3ad5">KRP-LGL</span><span class="kode-label">Legal Opinion & DD</span></div>
+        <div class="kode-badge" style="background:#5a1a6b33;border-color:#9b3ad544"><span class="kode-code" style="color:#9b3ad5">KRP-INS</span><span class="kode-label">Asuransi</span></div>
+        <div class="kode-badge" style="background:#5a1a6b33;border-color:#9b3ad544"><span class="kode-code" style="color:#9b3ad5">KRP-CPL</span><span class="kode-label">Compliance & Regulasi</span></div>
+      </div>
+    </div>
+    <div class="section-box">
+      <div class="section-label">🔄 ALUR PENANGANAN DOKUMEN</div>
+      <div class="alur-list">
+        <div class="alur-item"><div class="alur-bullet-col"><div class="alur-circle" style="background:#5a1a6b44;border-color:#9b3ad5;color:#9b3ad5">1</div><div class="alur-vline" style="background:#9b3ad533"></div></div><div class="alur-text">Dokumen baru → Review Legal Head</div></div>
+        <div class="alur-item"><div class="alur-bullet-col"><div class="alur-circle" style="background:#5a1a6b44;border-color:#9b3ad5;color:#9b3ad5">2</div><div class="alur-vline" style="background:#9b3ad533"></div></div><div class="alur-text">Diberi kode + cap "DOKUMEN ASLI"</div></div>
+        <div class="alur-item"><div class="alur-bullet-col"><div class="alur-circle" style="background:#5a1a6b44;border-color:#9b3ad5;color:#9b3ad5">3</div><div class="alur-vline" style="background:#9b3ad533"></div></div><div class="alur-text">Scan resolusi tinggi (min 300dpi) + upload</div></div>
+        <div class="alur-item"><div class="alur-bullet-col"><div class="alur-circle" style="background:#5a1a6b44;border-color:#9b3ad5;color:#9b3ad5">4</div><div class="alur-vline" style="background:#9b3ad533"></div></div><div class="alur-text">Simpan asli di brankas + copy kerja di lemari</div></div>
+        <div class="alur-item"><div class="alur-bullet-col"><div class="alur-circle" style="background:#5a1a6b44;border-color:#9b3ad5;color:#9b3ad5">5</div><div class="alur-vline" style="background:#9b3ad533"></div></div><div class="alur-text">Tidak ada pemusnahan — review setiap 5 tahun</div></div>
+        <div class="alur-item"><div class="alur-bullet-col"><div class="alur-circle" style="background:#5a1a6b44;border-color:#9b3ad5;color:#9b3ad5">6</div></div><div class="alur-text">Perubahan data → Tambah, jangan hapus versi lama</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ TAB 2: LEGAL OPINION ═══════════════════ -->
+<div id="tab-2" class="content hidden">
+  <div class="lo-header">
+    <div style="color:var(--dim);font-size:10px;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px">DOKUMEN RESMI</div>
+    <div style="font-size:19px;font-weight:700;letter-spacing:1px">LEGAL OPINION</div>
+    <div style="color:var(--muted);font-size:12px;margin-top:7px;line-height:1.6">Penerapan Sistem Manajemen Arsip Dokumen Legal yang Baik dan Benar</div>
+    <div class="lo-badge-row">
+      <span class="lo-badge">Legal Division</span>
+      <span class="lo-badge">Confidential</span>
+      <span class="lo-badge">ISO 9001 Compliant</span>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <button class="acc-btn open" style="background:#1e3a5f;border:1px solid #3b82f6;color:#60a5fa" onclick="toggleAcc(this)">
+      <span>I. PENDAHULUAN & DASAR PENUGASAN</span><span>−</span>
+    </button>
+    <div class="acc-body">
+      <p>Legal Opinion ini disusun sebagai panduan internal Divisi Legal dalam menyelenggarakan sistem pengarsipan dokumen yang memenuhi standar hukum berlaku di Indonesia dan prinsip-prinsip tata kelola dokumen internasional berdasarkan ISO 9001:2015 (yang relevan hingga publikasi terkini).</p>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <button class="acc-btn" style="background:var(--surface);border:1px solid var(--border);color:var(--muted)" onclick="toggleAcc(this)">
+      <span>II. DASAR HUKUM</span><span>+</span>
+    </button>
+    <div class="acc-body hidden">
+      <div class="lo-item"><div class="lo-item-title">UU No. 43 Tahun 2009 tentang Kearsipan</div><div class="lo-item-detail">Pasal 3: Penyelenggaraan kearsipan bertujuan menjamin keselamatan dan keamanan arsip sebagai bukti pertanggungjawaban. Pasal 40: Pencipta arsip wajib membuat tata naskah dinas, klasifikasi arsip, jadwal retensi arsip, dan sistem klasifikasi keamanan.</div></div>
+      <div class="lo-item"><div class="lo-item-title">UU No. 11 Tahun 2008 jo. UU No. 19 Tahun 2016 tentang ITE</div><div class="lo-item-detail">Pasal 5 ayat (1): Informasi Elektronik dan/atau Dokumen Elektronik merupakan alat bukti hukum yang sah. Pasal 6: Informasi/dokumen elektronik dianggap sah sepanjang dapat diakses, ditampilkan, dijamin keutuhannya, dan dapat dipertanggungjawabkan.</div></div>
+      <div class="lo-item"><div class="lo-item-title">UU No. 40 Tahun 2007 tentang Perseroan Terbatas</div><div class="lo-item-detail">Pasal 100: Direksi wajib membuat dan menyimpan daftar pemegang saham, risalah RUPS, risalah rapat Direksi, laporan tahunan, dan dokumen keuangan PT. Pasal 102: Kewajiban penyimpanan dokumen perseroan di tempat kedudukan perseroan.</div></div>
+      <div class="lo-item"><div class="lo-item-title">Peraturan ANRI No. 9 Tahun 2018 tentang Pengelolaan Arsip Elektronik</div><div class="lo-item-detail">Mengatur standar teknis pengelolaan arsip elektronik, autentikasi, migrasi, dan preservasi dokumen digital agar tetap valid sebagai alat bukti.</div></div>
+      <div class="lo-item"><div class="lo-item-title">KUH Perdata Pasal 1866 & Pasal 1867–1880</div><div class="lo-item-detail">Pasal 1866: Alat bukti surat (termasuk akta otentik dan akta di bawah tangan) merupakan alat pembuktian pertama dalam sengketa perdata. Arsip yang tertib memperkuat kekuatan pembuktian dokumen.</div></div>
+      <div class="lo-item"><div class="lo-item-title">Hukum Pajak – UU No. 28 Tahun 2007 tentang KUP</div><div class="lo-item-detail">Pasal 28: Wajib Pajak wajib menyimpan buku, catatan, dan dokumen yang menjadi dasar pembukuan atau pencatatan selama 10 tahun. Kewajiban ini berlaku pula atas dokumen kontrak yang berdampak pajak.</div></div>
+      <div class="lo-item"><div class="lo-item-title">ISO 9001:2015 Klausul 7.5 – Documented Information</div><div class="lo-item-detail">Klausul 7.5.2: Organisasi harus memastikan documented information tersedia dan sesuai untuk digunakan, terlindungi secara memadai. Klausul 7.5.3: Kontrol harus mencakup distribusi, akses, pengambilan, penggunaan, penyimpanan dan preservasi, perubahan kontrol, retensi, dan disposisi.</div></div>
+      <div class="lo-item"><div class="lo-item-title">Perpres No. 95 Tahun 2018 tentang SPBE</div><div class="lo-item-detail">Sistem Pemerintahan Berbasis Elektronik — menjadi acuan best practice pengelolaan dokumen digital yang autentik, andal, dan dapat dipertanggungjawabkan, termasuk untuk entitas swasta yang berinteraksi dengan pemerintah.</div></div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <button class="acc-btn" style="background:var(--surface);border:1px solid var(--border);color:var(--muted)" onclick="toggleAcc(this)">
+      <span>III. YURISPRUDENSI & PRESEDEN HUKUM</span><span>+</span>
+    </button>
+    <div class="acc-body hidden">
+      <div class="lo-item"><div class="lo-item-title">MA RI No. 1911 K/Pdt/2012</div><div class="lo-item-detail">Mahkamah Agung memperkuat putusan PN bahwa pihak yang tidak dapat menunjukkan dokumen kontrak asli dianggap lemah posisi hukumnya. Dokumen arsip yang lengkap dan teratur menjadi penentu kemenangan dalam sengketa kontrak.</div></div>
+      <div class="lo-item"><div class="lo-item-title">Putusan PN Jakarta Selatan No. 123/Pdt.G/2019</div><div class="lo-item-detail">Pengadilan menolak klaim karena dokumen yang diajukan tidak dapat dibuktikan keasliannya (tidak ada chain of custody yang jelas). Sistem pengarsipan dengan log akses menjadi elemen krusial pembuktian.</div></div>
+      <div class="lo-item"><div class="lo-item-title">MA RI — Doktrin Res Ipsa Loquitur dalam Arsip</div><div class="lo-item-detail">Dalam beberapa putusan, MA mengakui bahwa sistem pengarsipan yang buruk (hilang, rusak, tidak tertib) dapat menjadi presumption of negligence bagi korporasi dalam mempertahankan haknya.</div></div>
+      <div class="lo-item"><div class="lo-item-title">Putusan PTUN — Doktrin Presumptio Iustae Causa</div><div class="lo-item-detail">Setiap izin yang diterbitkan dianggap sah sampai dicabut secara resmi. Maka arsip izin wajib disimpan bahkan setelah habis masa berlakunya untuk membuktikan legalitas operasi pada periode tersebut.</div></div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <button class="acc-btn" style="background:var(--surface);border:1px solid var(--border);color:var(--muted)" onclick="toggleAcc(this)">
+      <span>IV. ANALISIS & REKOMENDASI</span><span>+</span>
+    </button>
+    <div class="acc-body hidden">
+      <div class="lo-item"><div class="lo-item-title">A. Prinsip Autentisitas (Authenticity)</div><div class="lo-item-detail">Dokumen arsip harus dapat dibuktikan dibuat oleh pihak yang berwenang pada waktu yang diklaim. Wajib menerapkan: tanda tangan basah atau tanda tangan elektronik tersertifikasi (BSSN), cap/stempel resmi, log waktu pembuatan dan penerimaan, serta chain of custody yang terdokumentasi.</div></div>
+      <div class="lo-item"><div class="lo-item-title">B. Prinsip Reliabilitas (Reliability)</div><div class="lo-item-detail">Arsip harus akurat dan lengkap merepresentasikan transaksi/kegiatan yang didokumentasikan. Wajib menerapkan: versi kontrol yang ketat, tidak ada penghapusan—hanya penambahan (append-only principle), dan audit trail setiap perubahan.</div></div>
+      <div class="lo-item"><div class="lo-item-title">C. Prinsip Integritas (Integrity)</div><div class="lo-item-detail">Arsip harus dijaga dari perubahan yang tidak sah setelah pembuatan. Implementasi: enkripsi dokumen final, hash verification (MD5/SHA-256) untuk softcopy, penyimpanan dalam format PDF/A yang terkunci, dan akses berbasis peran (RBAC).</div></div>
+      <div class="lo-item"><div class="lo-item-title">D. Prinsip Kegunaan (Usability)</div><div class="lo-item-detail">Arsip harus dapat ditemukan, diambil, diinterpretasikan, dan digunakan kapanpun dibutuhkan. Wajib ada: sistem pengkodean yang konsisten, indeks pencarian yang komprehensif, format file yang tahan uji waktu (PDF/A, tidak bergantung software tertentu).</div></div>
+      <div class="lo-item"><div class="lo-item-title">E. Jadwal Retensi Dokumen (JRA)</div><div class="lo-item-detail">Kontrak Komersial: 10 tahun pasca berakhir · Izin & Regulasi: selama berlaku + 5 tahun · Dokumen Proyek: 15 tahun pasca selesai · Akta & Dokumen Korporat: PERMANEN · Korespondensi biasa: 5 tahun · Draft & Dokumen Kerja: 2 tahun.</div></div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <button class="acc-btn" style="background:var(--surface);border:1px solid var(--border);color:var(--muted)" onclick="toggleAcc(this)">
+      <span>V. KESIMPULAN & SARAN</span><span>+</span>
+    </button>
+    <div class="acc-body hidden">
+      <p>1. KEWAJIBAN HUKUM — Pengelolaan arsip yang baik bukan sekadar best practice, melainkan KEWAJIBAN HUKUM berdasarkan UU Kearsipan, UUPT, UU KUP, dan UU ITE.
+
+2. RISIKO TANPA SISTEM — Perusahaan yang tidak memiliki sistem arsip yang tertib menghadapi risiko: kekalahan dalam sengketa hukum (lemahnya alat bukti), sanksi perpajakan karena tidak dapat menunjukkan dokumen, dan potensi tanggung jawab pribadi Direksi.
+
+3. IMPLEMENTASI ISO 9001 — Klausul 7.5 ISO 9001:2015 memberikan kerangka kerja yang sejalan dengan ketentuan hukum Indonesia, sehingga implementasinya sekaligus memenuhi dua standar: internasional dan domestik.
+
+4. SARAN PRIORITAS — (a) Segera terapkan Jadwal Retensi Arsip (JRA) formal; (b) Implementasikan sistem pengkodean dokumen yang konsisten; (c) Tunjuk Document Controller khusus di Divisi Legal; (d) Lakukan audit arsip internal setiap 6 bulan; (e) Pertimbangkan sistem DMS (Document Management System) berbasis cloud dengan enkripsi.</p>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <button class="acc-btn" style="background:var(--surface);border:1px solid var(--border);color:var(--muted)" onclick="toggleAcc(this)">
+      <span>VI. DISCLAIMER</span><span>+</span>
+    </button>
+    <div class="acc-body hidden">
+      <p>Legal Opinion ini disusun berdasarkan peraturan perundang-undangan yang berlaku per tanggal penerbitan dan dimaksudkan sebagai panduan internal. Setiap perkembangan regulasi yang terjadi setelahnya wajib dikaji ulang. Legal Opinion ini tidak menggantikan konsultasi hukum spesifik untuk kasus-kasus tertentu.</p>
+    </div>
+  </div>
+</div>
+
+<footer>Legal Division &nbsp;·&nbsp; Document Management System &nbsp;·&nbsp; ISO 9001 &nbsp;·&nbsp; UU Kearsipan No. 43/2009 &nbsp;·&nbsp; Confidential</footer>
+
+<script>
+  // ─── Tab switching ───────────────────────────────────────
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  function switchTab(idx){
+    tabBtns.forEach((b,i)=>{b.classList.toggle('active', i===idx)});
+    [0,1,2].forEach(i=>{
+      const el = document.getElementById('tab-'+i);
+      el.classList.toggle('hidden', i!==idx);
+    });
+  }
+
+  // ─── Mindmap branch toggle ───────────────────────────────
+  const branchData = {
+    kontrak:  { color:'#1a6b5a', accent:'#2ecc9a' },
+    perizinan:{ color:'#1a3d6b', accent:'#3a9bd5' },
+    proyek:   { color:'#6b1a1a', accent:'#e05252' },
+    korporat: { color:'#5a1a6b', accent:'#9b3ad5' },
+  };
+  let activeBranch = null;
+
+  function toggleBranch(id){
+    const isOpen = activeBranch === id;
+    // reset all
+    Object.keys(branchData).forEach(k=>{
+      const b = branchData[k];
+      const card = document.getElementById('bc-'+k);
+      card.style.background = b.color+'33';
+      card.style.borderColor = b.color+'55';
+      card.style.boxShadow = 'none';
+      card.querySelector('.branch-label').style.color = '#94a3b8';
+      document.getElementById('detail-'+k).classList.add('hidden');
+    });
+    if(!isOpen){
+      activeBranch = id;
+      const b = branchData[id];
+      const card = document.getElementById('bc-'+id);
+      card.style.background = b.color+'55';
+      card.style.borderColor = b.accent;
+      card.style.boxShadow = '0 0 24px '+b.accent+'44';
+      card.querySelector('.branch-label').style.color = b.accent;
+      const panel = document.getElementById('detail-'+id);
+      panel.classList.remove('hidden');
+      panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+    } else {
+      activeBranch = null;
+    }
+  }
+
+  // ─── SOP panel switching ─────────────────────────────────
+  const sopColors = [
+    {bg:'#1a6b5a22',border:'#2ecc9a55',color:'#2ecc9a'},
+    {bg:'#1a3d6b22',border:'#3a9bd544',color:'#3a9bd5'},
+    {bg:'#6b1a1a22',border:'#e0525244',color:'#e05252'},
+    {bg:'#5a1a6b22',border:'#9b3ad544',color:'#9b3ad5'},
+  ];
+  const sopLabels = ['📋 Kontrak Komersial','🏛️ Perizinan & Regulasi','🏗️ Dokumen Proyek','⚖️ Korporat & Governance'];
+  function switchSOP(idx, btn){
+    const tabs = document.querySelectorAll('.sop-tab');
+    tabs.forEach((t,i)=>{
+      t.classList.toggle('active', i===idx);
+      if(i===idx){
+        t.style.background = sopColors[i].bg;
+        t.style.borderColor = sopColors[i].border;
+        t.style.color = sopColors[i].color;
+      } else {
+        t.style.background = 'transparent';
+        t.style.borderColor = 'var(--border)';
+        t.style.color = 'var(--dim)';
+      }
+    });
+    [0,1,2,3].forEach(i=>{
+      document.getElementById('sop-panel-'+i).classList.toggle('hidden', i!==idx);
+    });
+  }
+
+  // ─── Accordion ───────────────────────────────────────────
+  function toggleAcc(btn){
+    const body = btn.nextElementSibling;
+    const isOpen = !body.classList.contains('hidden');
+    if(isOpen){
+      body.classList.add('hidden');
+      btn.classList.remove('open');
+      btn.style.background = 'var(--surface)';
+      btn.style.borderColor = 'var(--border)';
+      btn.style.color = 'var(--muted)';
+      btn.querySelector('span:last-child').textContent = '+';
+    } else {
+      body.classList.remove('hidden');
+      btn.classList.add('open');
+      btn.style.background = '#1e3a5f';
+      btn.style.borderColor = '#3b82f6';
+      btn.style.color = '#60a5fa';
+      btn.querySelector('span:last-child').textContent = '−';
+    }
+  }
+</script>
+</body>
+</html>
